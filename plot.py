@@ -1,68 +1,60 @@
 import pandas
-import utils
 import plotly.express as px
 #import dash
 
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-i', '--input', default='bopt/o011.csv')
+parser.add_argument('-f', '--file', default='bopt/b011.csv')
 
 args, call= parser.parse_known_args()
 args= dict(args._get_kwargs())
-df = pandas.read_csv(args['input'])
+df = pandas.read_csv(args['file'])
 
+df['min_loss'] = df['loss'].expanding().min()
 
-
-filenames = ["batch_csv/out{}.csv".format(i) for i in range(11)]
-df = pandas.concat(
-    [pandas.read_csv(filename) for filename in filenames]
-)
-df = df.drop(['Unnamed: 0'], axis=1).reset_index(drop=True)
-
-
-
-
-
-
-
-
-import utils
-import ray
-import pandas
-import shutil
-import os
-
-import numpy
-from ray import tune
-from ray import air
-from ray.air import session
-from ray.tune.search.bayesopt import BayesOptSearch
-from ray.tune.search import ConcurrencyLimiter
-
-import argparse
-
-## specify CLI to function
-parser = argparse.ArgumentParser()
-parser.add_argument('-c', '--concurrency', default=1)
-parser.add_argument('-d', '--div', nargs=3, type=float, default=[0.5, 1.5, 100])
-parser.add_argument('-s', '--save', '-o', '--output', default="output/optuna")
-parser.add_argument('-t', '--trials', default=100)
-#parser.add_argument('-p', '--params', nargs='+', default=['PYR->BC_AMPA', 'PYR->OLM_AMPA', 'PYR->PYR_AMPA'])
-parser.add_argument('-p', '--params', nargs='+', default=['Z'*80])
-parser.add_argument('-g', '--greps', nargs='+', default=['Z'*80])
-
-args, call= parser.parse_known_args()
-args= dict(args._get_kwargs())
-
-cwd = os.getcwd()
-cmd_args = {
-    'mpiexec': shutil.which('mpiexec'), 'cores': 4, 'nrniv': shutil.which('nrniv'),
-    'python': shutil.which('python'), 'script': cwd + '/runner.py'
-}
-
-initial_params = { # weights from cfg, AMPA, GABA, NMDA
+actual = { # weights from cfg, AMPA, GABA, NMDA
     'PYR->BC_AMPA' : 0.36e-3, "BC->BC_GABA"  : 4.5e-3 , "PYR->BC_NMDA" : 1.38e-3 ,
     'PYR->OLM_AMPA': 0.36e-3, "BC->PYR_GABA" : 0.72e-3, "PYR->OLM_NMDA": 0.7e-3  ,
     'PYR->PYR_AMPA': 0.02e-3, "OLM->PYR_GABA": 72e-3  , "PYR->PYR_NMDA": 0.004e-3,
 }
+
+rename = {
+       'config/netParams.connParams.BC->BC_GABA.weight',
+       'config/netParams.connParams.BC->PYR_GABA.weight',
+       'config/netParams.connParams.OLM->PYR_GABA.weight',
+       'config/netParams.connParams.PYR->BC_AMPA.weight',
+       'config/netParams.connParams.PYR->BC_NMDA.weight',
+       'config/netParams.connParams.PYR->OLM_AMPA.weight',
+       'config/netParams.connParams.PYR->OLM_NMDA.weight',
+       'config/netParams.connParams.PYR->PYR_AMPA.weight',
+       'config/netParams.connParams.PYR->PYR_NMDA.weight',
+}
+
+rename = { n: n.split('.')[2] for n in rename if n in df.columns}
+
+params = rename.values()
+
+df.rename(rename, axis=1, inplace=True)
+
+def expanding_idxmin(df, col):
+    curr = 0
+    for i in range(len(df)):
+        if df[col][i] < df[col][0:i].min():
+            yield i
+            curr = i
+        else:
+            yield curr
+
+for param in params:
+    df['MIN_{}'.format(param)] = df[param][expanding_idxmin(df, 'loss')].reset_index(drop=True)
+
+for param in ['PYR', 'BC', 'OLM']:
+    df['MIN_{}'.format(param)] = df[param][expanding_idxmin(df, 'loss')].reset_index(drop=True)
+
+
+fig = px.scatter(df, x=df.index, y='loss')
+
+fig.add_scatter(x=df.index, y=df['min_loss'], mode='lines', name='min_loss')
+
+fig.show()
