@@ -1,9 +1,9 @@
-from pubtk.runtk import SocketRunner
+from pubtk.runtk import Runner
 import os, sys, json
 
 print(os.getpid())
 
-runner = SocketRunner()
+runner = Runner()
 
 mappings = json.dumps(runner.mappings)
 
