@@ -11,7 +11,7 @@ def expanding_idxmin(df, col):
         else:
             yield curr
 
-ALGOS = ["bayesopt", "blendsearch", "cfo", "optuna", "random"]
+csvs = {'boltzman': 'optuna250_boltzmann.csv', 'mse': 'optuna250_mse.csv'}
 
 TARGET = { # targets and weights from cfg
     'loss': 0,
@@ -37,8 +37,8 @@ rename = {
 
 rename = { "config/netParams.connParams.{}.weight".format(n): n for n in rename}
 
-def create_plots(algo):
-    df = pandas.read_csv("{}250.csv".format(algo))
+def create_plots(label, csv):
+    df = pandas.read_csv(csv)
     try:
         df = df[TARGET.keys()]
     except:
@@ -54,14 +54,14 @@ def create_plots(algo):
         for delta in deltas:
             fig.add_vline(delta)
         fig.add_hline(TARGET[param])
-        fig.write_html("plots/{}__{}.html".format(algo, param))
+        fig.write_html("plots/{}__{}.html".format(label, param))
 
-"""
-for algo in ALGOS:
-    create_plots(algo)
-"""
 
-create_plots("random")
+for label, file in csvs.items():
+    create_plots(label, file)
+
+
+#create_plots("random")
 
 
 
