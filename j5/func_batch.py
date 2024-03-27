@@ -28,4 +28,12 @@ ray_search(dispatcher_constructor = Dispatcher, #TODO pass in a run_config?
 #TODO something like this?
 """
 run_config = {´dispatcher´: ´inet´, ´submit´: ´socket´, ´command´: ´python init´}
+params = {'synMechTau2': [3.0, 5.0, 7.0], # assumes list of values by default if grid search-like algo
+		  #'synMechTau2': [3.0, 7.0], # assumes lower/upper bounds by default if evol-like algo
+          'connWeight' : paramtypes.sample_from(lambda _: numpy.random.uniform(0.005, 0.15))} # can optionally pass any of the paramtypes (= ray.tune data types)
+
+
+
+
 """
+
