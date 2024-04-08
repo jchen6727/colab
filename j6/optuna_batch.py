@@ -1,5 +1,5 @@
-from pubtk.raytk.search import ray_optuna_search #the one that allows for multiobjective optimization
-
+#from pubtk.raytk.search import ray_optuna_search #the one that allows for multiobjective optimization
+from netpyne.batchtools.search import ray_optuna_search #the one that allows for multiobjective optimization
 from netpyne.batchtools import runtk
 
 from ray import tune
@@ -10,7 +10,7 @@ params = {'synMechTau2': tune.uniform(3.0, 7.0), # LB
 batch_config = {'command': 'python init.py'}
 
 Dispatcher = runtk.dispatchers.INETDispatcher
-Submit = runtk.submits.ZSHSubmitSOCK
+Submit = runtk.submits.SHSubmitSOCK
 
 ray_study = ray_optuna_search(dispatcher_constructor = Dispatcher,
                   submit_constructor=Submit,
