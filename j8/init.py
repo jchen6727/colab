@@ -9,16 +9,21 @@ comm.initialize()
 sim.createSimulate(netParams=netParams,
                           simConfig=cfg)
 
-results = sim.analysis.popAvgRates(show=False)
+#comm.pc.barrier()
+#sim.gatherData()
+if comm.is_host():
+    results = sim.analysis.popAvgRates(show=False)
 
 #inputs = specs.get_mappings()
 #out_json = json.dumps({**inputs, **rates})
 
-#results['S_loss'] = (results['S'] - 10.2)**2
-#results['M_loss'] = (results['M'] - 12.9)**2
-out_json = json.dumps(results)
+    results['PYR_loss'] = (results['PYR'] - 3.33875)**2
+    results['BC_loss']  = (results['BC']  - 19.725 )**2
+    results['OLM_loss'] = (results['OLM'] - 3.470  )**2
+    out_json = json.dumps(results)
 
-print(out_json)
+    print(out_json)
+    print(comm.is_host())
 #TODO put all of this in a single function.
-comm.send(out_json)
-comm.close()
+    comm.send(out_json)
+    comm.close()
