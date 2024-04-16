@@ -14,6 +14,7 @@ cfg.recordStep = 0.1            # Step size in ms to save data (eg. V traces, LF
 cfg.filename = '00'         # Set file output name
 cfg.savePickle = False        # Save params, network and sim output to pickle file
 cfg.saveDat = False
+cfg.saveJson = True
 cfg.printRunTime = 0.1 
 cfg.recordLFP = None # don't save this
 
