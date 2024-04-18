@@ -1,7 +1,5 @@
 from netpyne.batchtools.search import ray_search
-
 from netpyne.batchtools import runtk
-
 from ray import tune
 
 params = {'nmda.PYR->BC' : tune.grid_search([0]),

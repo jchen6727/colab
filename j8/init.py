@@ -6,13 +6,12 @@ import json
 
 comm.initialize()
 
-sim.createSimulateAnalyze(netParams=netParams,
-                          simConfig=cfg)
-
+sim.createSimulate(netParams=netParams, simConfig=cfg)
 print('completed simulation...')
 #comm.pc.barrier()
 #sim.gatherData()
 if comm.is_host():
+    netParams.save("{}/{}_params.json".format(cfg.saveFolder, cfg.simLabel))
     print('transmitting data...')
     inputs = specs.get_mappings()
     #print(json.dumps({**inputs}))
