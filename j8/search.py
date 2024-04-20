@@ -2,15 +2,15 @@ from netpyne.batchtools.search import ray_search
 from netpyne.batchtools import runtk
 from ray import tune
 
-params = {'nmda.PYR->BC' : tune.grid_search([0]),
+params = {'nmda.PYR->BC' : tune.grid_search([0, 1]),
           'nmda.PYR->OLM': tune.grid_search([0]),
           'nmda.PYR->PYR': tune.grid_search([0]),
           'ampa.PYR->BC' : tune.grid_search([0]),
-          'ampa.PYR->OLM': tune.grid_search([0]),
+          'ampa.PYR->OLM': tune.grid_search([0, 1]),
           'ampa.PYR->PYR': tune.grid_search([0]),
           'gaba.BC->BC'  : tune.grid_search([0]),
           'gaba.BC->PYR' : tune.grid_search([0]),
-          'gaba.OLM->PYR': tune.grid_search([0])}
+          'gaba.OLM->PYR': tune.grid_search([0, 1])}
 
 batch_config = {'command': 'mpiexec -np 4 nrniv -python -mpi init.py'}
 
