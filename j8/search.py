@@ -1,5 +1,6 @@
 from netpyne.batchtools.search import ray_search
-from netpyne.batchtools import runtk
+from netpyne.batchtools import submits
+from netpyne.batchtools import dispatchers
 from ray import tune
 
 params = {'nmda.PYR->BC' : tune.grid_search([0, 1]),
@@ -12,10 +13,20 @@ params = {'nmda.PYR->BC' : tune.grid_search([0, 1]),
           'gaba.BC->PYR' : tune.grid_search([0]),
           'gaba.OLM->PYR': tune.grid_search([0, 1])}
 
-batch_config = {'command': 'mpiexec -np 4 nrniv -python -mpi init.py'}
+# use batch_shell_config if running directly on the machine
+batch_shell_config = {'command': 'mpiexec -np 4 nrniv -python -mpi init.py'}
 
-Dispatcher = runtk.dispatchers.INETDispatcher
-Submit = runtk.submits.SHSubmitSOCK
+# use batch_sge_config if running on a
+batch_sge_config = {
+    'cores': 5
+    'vmem': '32G'
+    'command' 'mpiexec -n $NSLOTS -hosts $(hostname) nrniv -python -mpi init.py'}
+
+batch_config = batch_shell_config
+
+Dispatcher = dispatchers.SOCKETDispatcher
+Submit = submits.SGESubmitSOCK
+
 
 ray_search(dispatcher_constructor = Dispatcher,
            submit_constructor=Submit,
@@ -28,4 +39,4 @@ ray_search(dispatcher_constructor = Dispatcher,
            metric = 'loss',
            mode = 'min',
            algorithm = "variant_generator",
-           max_concurrent = 1)
+           max_concurrent = 4)
