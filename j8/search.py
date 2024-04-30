@@ -14,18 +14,20 @@ params = {'nmda.PYR->BC' : tune.grid_search([0, 1]),
           'gaba.OLM->PYR': tune.grid_search([0, 1])}
 
 # use batch_shell_config if running directly on the machine
-batch_shell_config = {'command': 'mpiexec -np 4 nrniv -python -mpi init.py'}
+batch_shell_config = {'command': 'mpiexec -np 4 nrniv -python -mpi init.py',}
 
 # use batch_sge_config if running on a
 batch_sge_config = {
-    'cores': 5
-    'vmem': '32G'
-    'command' 'mpiexec -n $NSLOTS -hosts $(hostname) nrniv -python -mpi init.py'}
+    'queue': 'cpu.q',
+    'cores': 5,
+    'vmem': '4G',
+    'realtime': '00:30:00',
+    'command': 'mpiexec -n $NSLOTS -hosts $(hostname) nrniv -python -mpi init.py'}
 
 batch_config = batch_shell_config
 
-Dispatcher = dispatchers.SOCKETDispatcher
-Submit = submits.SGESubmitSOCK
+Dispatcher = dispatchers.INETDispatcher
+Submit = submits.SHSubmitSOCK
 
 
 ray_search(dispatcher_constructor = Dispatcher,
